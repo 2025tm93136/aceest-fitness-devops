@@ -107,6 +107,11 @@ def calculate_bmi(weight_kg, height_cm):
     return round(weight_kg / (height_cm / 100) ** 2, 1)
 
 
+def is_int(value):
+    """True for real integers; JSON booleans are rejected even though bool subclasses int."""
+    return isinstance(value, int) and not isinstance(value, bool)
+
+
 def membership_is_active(status, end_date, today=None):
     if status != "Active":
         return False
@@ -231,7 +236,7 @@ def create_app(db_path=None):
         data = request.get_json(silent=True) or {}
         week = data.get("week")
         adherence = data.get("adherence")
-        if not week or not isinstance(adherence, int) or not 0 <= adherence <= 100:
+        if not week or not is_int(adherence) or not 0 <= adherence <= 100:
             return error("week is required and adherence must be an integer 0-100")
         db = get_db()
         db.execute(
@@ -261,7 +266,7 @@ def create_app(db_path=None):
         duration = data.get("duration_min")
         if workout_type not in WORKOUT_TYPES:
             return error(f"type must be one of {sorted(WORKOUT_TYPES)}")
-        if not isinstance(duration, int) or duration <= 0:
+        if not is_int(duration) or duration <= 0:
             return error("duration_min must be a positive integer")
         workout_date = data.get("date") or date.today().isoformat()
         db = get_db()

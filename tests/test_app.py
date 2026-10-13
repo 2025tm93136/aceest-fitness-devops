@@ -2,7 +2,7 @@ from datetime import date
 
 import pytest
 
-from app import calculate_bmi, calculate_calories, create_app, membership_is_active
+from app import calculate_bmi, calculate_calories, create_app, is_int, membership_is_active
 
 
 @pytest.fixture
@@ -35,6 +35,12 @@ def test_calculate_bmi():
     assert calculate_bmi(70, 175) == 22.9
     with pytest.raises(ValueError):
         calculate_bmi(70, 0)
+
+
+def test_is_int_rejects_booleans():
+    assert is_int(5)
+    assert not is_int(True)
+    assert not is_int(5.0)
 
 
 def test_membership_is_active():
@@ -134,3 +140,10 @@ def test_workout_validation(client, member):
                        json={"type": "Yoga", "duration_min": 30}).status_code == 400
     assert client.post(f"/clients/{member}/workouts",
                        json={"type": "Cardio", "duration_min": 0}).status_code == 400
+
+
+def test_boolean_values_are_rejected(client, member):
+    assert client.post(f"/clients/{member}/progress",
+                       json={"week": "W1", "adherence": True}).status_code == 400
+    assert client.post(f"/clients/{member}/workouts",
+                       json={"type": "Cardio", "duration_min": True}).status_code == 400
