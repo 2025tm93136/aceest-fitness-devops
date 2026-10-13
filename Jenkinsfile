@@ -31,11 +31,6 @@ pipeline {
             }
         }
         stage('Docker Build') {
-            // Runs only where the Jenkins user can reach the Docker daemon;
-            // GitHub Actions always performs the containerised build/test.
-            when {
-                expression { sh(script: 'docker info > /dev/null 2>&1', returnStatus: true) == 0 }
-            }
             steps {
                 sh 'docker build --target test -t ${IMAGE}:test .'
                 sh 'docker run --rm ${IMAGE}:test'
